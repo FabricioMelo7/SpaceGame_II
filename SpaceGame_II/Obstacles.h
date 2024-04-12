@@ -1,0 +1,41 @@
+#pragma once
+#ifndef OBSTACLE_H 
+#define OBSTACLE_H
+
+#include "raylib.h"
+// #include "Entities/Lander.h"
+
+class Asteroid
+{
+public:
+    Vector2 position;
+    Texture2D texture;
+    float speed;
+    Rectangle sourceRect;
+    int frame;
+    float updateTime;
+    float runningTime;
+    float scale;
+
+    Asteroid(Vector2 startPos, Texture2D tex, float spd, float scl);
+    void Update(float deltaTime);
+    void Draw();
+    bool IsOffScreen(int windowHeight);
+
+    Rectangle GetAsteroidRectangle() const;
+
+private:
+    void UpdateFrame(float deltaTime);
+};
+
+// class Collision
+// {
+//     public:
+//     static void DetectCollision()
+
+//     private:
+//     Collision(){}
+// };
+
+#endif // OBSTACLE_COLLISIONS_H
+
