@@ -21,6 +21,21 @@ void CheckTouchDown(std::vector<const Ship*>& Ships)
     }
 }
 
+void AsteroidCollision(Rectangle asteroid, std::vector<const Ship*>& Ships)
+{
+    bool isCollision = false;
+
+    for (const Ship* ship : Ships)
+    {
+        isCollision = CheckCollisionRecs(asteroid, MovementController::GetShipRectangle(ship));
+
+        if (isCollision == true)
+        {
+            isGameOver_Fail = true;
+        }
+    }
+}
+
 void SuccessMessage()
 {
     BeginDrawing();
@@ -72,10 +87,7 @@ int main()
     const int windowWidth = 800;
     const int windowHeight = 800;
 
-    float scaleWidth = (float)GetScreenWidth() / windowWidth;
-    float scaleHeight = (float)GetScreenHeight() / windowHeight;
-
-    float scale = std::min(scaleWidth, scaleHeight);
+    float scale = 2.0f;   
 
     char Title[]{ "SpaceHopper" };
 
@@ -101,7 +113,7 @@ int main()
     shipData1.texture = LoadTexture("ship.png");
     shipData1.animatedTexture = LoadTexture("engineSpriteSheet.png");
 
-    float scale = 2.0f;
+    
     float scaledHeight = shipData1.texture.height * scale;
 
     Ship shipData2;
@@ -167,15 +179,15 @@ int main()
             BeginDrawing();
             ClearBackground(BLACK);
 
-            // // Update and Draw Asteroid
-            // asteroid.Update(deltaTime);
+             // Update and Draw Asteroid
+             asteroid.Update(deltaTime);
 
-            // // Reset asteroid position if it goes off-screen
-            // if (asteroid.IsOffScreen(windowHeight)) {
-            //     int textureWidth = asteroid.texture.width / 16;
-            //     asteroid.position.x = GetRandomValue(0, windowWidth - textureWidth);
-            //     asteroid.position.y = -asteroid.texture.height;
-            // }
+             // Reset asteroid position if it goes off-screen
+             if (asteroid.IsOffScreen(windowHeight)) {
+                 int textureWidth = asteroid.texture.width / 16;
+                 asteroid.position.x = GetRandomValue(0, windowWidth - textureWidth);
+                 asteroid.position.y = -asteroid.texture.height;
+             }
 
             float desiredLandingSpeed = 346 / 17.0f - shipData1.position.y / 24.0f;
             desiredLandingSpeed = std::min(-desiredLandingSpeed, -1.0f);
@@ -198,8 +210,8 @@ int main()
             movementController.UpdatePosition_Side_2(shipData2, deltaTime);
             ApplySideBoosters(shipData2, deltaTime);
 
-            Rectangle shipRect1 = MovementController::GetShipRectangle(shipData1);
-            Rectangle shipRect2 = MovementController::GetShipRectangle(shipData2);
+            Rectangle shipRect1 = MovementController::GetShipRectangle(Ships[0]);
+            Rectangle shipRect2 = MovementController::GetShipRectangle(Ships[1]);
             Rectangle asteroidRect = asteroid.GetAsteroidRectangle();
 
             DrawTexturePro(spaceBackground, sourceSpaceBGRec, destinationSpaceBGRec, backgroundOrigin, 0.0f, WHITE);
@@ -246,6 +258,8 @@ int main()
             DrawText(TextFormat("Speed: %0.2f Vertical", shipData1.v.y), 10, 50, 20, WHITE);
             DrawText(TextFormat("Speed: %0.2f Vertical", output), 10, 70, 20, RED);
             DrawText(TextFormat("position_Y: %0.2f Y", shipData2.position.x), 10, 90, 20, RED);
+            
+            AsteroidCollision(asteroidRect, Ships); 
 
             CheckTouchDown(Ships);
 

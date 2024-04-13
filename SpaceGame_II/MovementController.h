@@ -17,7 +17,7 @@ public:
 
 
 
-    static Rectangle GetShipRectangle(const Ship& ship);
+    static Rectangle GetShipRectangle(const Ship* ship);
     bool thrustOn_1 = false;
     bool thrustOn_2 = false;
 
