@@ -54,25 +54,6 @@ void FailMessage()
     EndDrawing();
 }
 
-void ShipDataInit(Ship& ship1, Ship& ship2)
-{
-    ship1.dr.y = 0.0f;
-    ship1.dr.x = 0.0f;
-    ship1.v.y = 0.0f;
-    ship1.v.x = 0.0f;
-    ship1.dv.y = 0.0f;
-    ship1.dv.x = 0.0f;
-    ship1.Thrust.y = 0.0f;
-
-    ship2.dr.y = 0.0f;
-    ship2.dr.x = 0.0f;
-    ship2.v.y = 0.0f;
-    ship2.v.x = 0.0f;
-    ship2.dv.y = 0.0f;
-    ship2.dv.x = 0.0f;
-    ship2.Thrust.y = 0.0f;
-}
-
 void DisplayGameOver()
 {
     if (isGameOVer_Success)
@@ -108,17 +89,16 @@ int main()
 
     // Load the spaceship texture
     Ship shipData1;
+    shipData1.Init("Ship1");
     Ships.push_back(&shipData1);
-    shipData1.m_Name = "Ship1";
     shipData1.texture = LoadTexture("ship.png");
     shipData1.animatedTexture = LoadTexture("engineSpriteSheet.png");
-
-    
+        
     float scaledHeight = shipData1.texture.height * scale;
 
     Ship shipData2;
-    Ships.push_back(&shipData2);
-    shipData2.m_Name = "Ship2";
+    shipData2.Init("Ship2");
+    Ships.push_back(&shipData2);    
     shipData2.texture = LoadTexture("ship2.png");
     shipData2.animatedTexture = LoadTexture("engineSpriteSheet2.png");
 
@@ -131,12 +111,10 @@ int main()
     shipData2.position.x += 20.0f;
     shipData2.position.y = 10.0f;
 
-    ShipDataInit(shipData1, shipData2);
-
     // Use to check the ship has a safe landing
     const float StarterPosition = shipData1.position.y;
 
-    const float moveSpeed = 100.0f;
+    /*const float moveSpeed = 100.0f;*/
     float deltaTime = 0.06f; // 1 frame every 0.06ms, reflecting 60fps
 
     int thrustAnimationFrameIndex = 0;
@@ -147,9 +125,7 @@ int main()
 
     Asteroid asteroid({ 100, -100 }, asteroids, 80.0f, 0.5f);
 
-    MovementController movementController(moveSpeed, StarterPosition);
-
-    Pid_Controller VerticalBoosterPID;
+    MovementController movementController(StarterPosition);    
 
     while (!WindowShouldClose())
     {
@@ -187,20 +163,11 @@ int main()
                  int textureWidth = asteroid.texture.width / 16;
                  asteroid.position.x = GetRandomValue(0, windowWidth - textureWidth);
                  asteroid.position.y = -asteroid.texture.height;
-             }
-
-            float desiredLandingSpeed = 346 / 17.0f - shipData1.position.y / 24.0f;
-            desiredLandingSpeed = std::min(-desiredLandingSpeed, -1.0f);
-            VerticalBoosterPID.SetError(desiredLandingSpeed, shipData1.v.y);
-
-            float output_P = VerticalBoosterPID.Get_P_output();
-            float output_i = VerticalBoosterPID.Get_I_output(deltaTime);
-            float output_d = VerticalBoosterPID.Get_D_output(deltaTime);
-            float output = output_i + output_P + output_d;
+             }            
 
             // // ship and drawing logic here
             // movementController.UpdatePosition_1(shipData1, shipData1.position.y, deltaTime);  //** UNCOMMENT THIS TO BE ABLE TO PLAY WITH THE OTHER SHIP,
-            movementController.AutoLand_Vertical(shipData1, output);
+            movementController.AutoLand_Vertical(shipData1, deltaTime);
             ApplyGravity(shipData1, deltaTime);
             movementController.UpdatePosition_2(shipData2, shipData2.position.y, deltaTime);
             ApplyGravity(shipData2, deltaTime);
@@ -255,9 +222,7 @@ int main()
             DrawRectangle(0, floorPositionY, windowWidth, 10, WHITE);
             DrawText(TextFormat("Height: %0.2f miles", (windowHeight - shipData1.position.y)), 10, 10, 20, WHITE); // THIS IS UPSIDE DOWN... NEEDS FIXING
             DrawText(TextFormat("Fuel: %0.2f Liters", shipData1.fuel), 10, 30, 20, WHITE);
-            DrawText(TextFormat("Speed: %0.2f Vertical", shipData1.v.y), 10, 50, 20, WHITE);
-            DrawText(TextFormat("Speed: %0.2f Vertical", output), 10, 70, 20, RED);
-            DrawText(TextFormat("position_Y: %0.2f Y", shipData2.position.x), 10, 90, 20, RED);
+            DrawText(TextFormat("Speed: %0.2f Vertical", shipData1.v.y), 10, 50, 20, WHITE);            
             
             AsteroidCollision(asteroidRect, Ships); 
 

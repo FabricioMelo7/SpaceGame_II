@@ -26,5 +26,18 @@ struct Ship
 
     float fuel = 1000.0f;
     float engine_FuelConsumption = 0.5f;
+
+    void Init(std::string name)
+    {
+        this->m_Name = name;
+        this->dr.y = 0.0f;
+        this->dr.x = 0.0f;
+        this->v.y = 0.0f;
+        this->v.x = 0.0f;
+        this->dv.y = 0.0f;
+        this->dv.x = 0.0f;
+        this->Thrust.y = 0.0f;
+        this->Thrust.x = 0.0f;
+    }   
 };
 #endif //TICKET_H

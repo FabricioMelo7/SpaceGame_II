@@ -6,7 +6,7 @@ Rectangle MovementController::GetShipRectangle(const Ship* ship)
     return Rectangle{ ship->position.x, ship->position.y, ship->texture.width* scale, ship->texture.height* scale };
 }
 
-MovementController::MovementController(float moveSpeed, float initialAltitude)
+MovementController::MovementController(float initialAltitude)
     : initialAltitude(initialAltitude) {}
 
 void MovementController::UpdatePosition_1(Ship& ship1, float& altitudeCounter, float deltaTime)
@@ -107,11 +107,20 @@ void MovementController::UpdatePosition_Side_2(Ship& ship2, float deltaTime)
     }
 }
 
+Pid_Controller VerticalBoosterPID;
 
-void MovementController::AutoLand_Vertical(Ship& ship, float pid_output)
+void MovementController::AutoLand_Vertical(Ship& ship, float deltaTime)
 {
-    thrustOn_1 = true;
-    // ship.Thrust.y = (pid_output * ship.Thrust_value)
+    thrustOn_1 = true;    
 
-    ship.Thrust.y = pid_output * ship.Thrust_value;
+    float desiredLandingSpeed = 346 / 17.0f - ship.position.y / 24.0f;
+    desiredLandingSpeed = std::min(-desiredLandingSpeed, -1.0f);
+    VerticalBoosterPID.SetError(desiredLandingSpeed, ship.v.y);
+
+    float output_P = VerticalBoosterPID.Get_P_output();
+    float output_i = VerticalBoosterPID.Get_I_output(deltaTime);
+    float output_d = VerticalBoosterPID.Get_D_output(deltaTime);
+    float output = output_i + output_P + output_d;
+
+    ship.Thrust.y = (output * ship.Thrust_value);
 }
